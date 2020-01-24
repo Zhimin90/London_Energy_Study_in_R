@@ -1,0 +1,134 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+library(zoo)
+library(xts)
+library(ggplot2)
+library(plyr)
+library(readr)
+library(rlist)
+
+df=read.csv("Power-Networks-LCL-June2015(withAcornGps)v2.csv")
+head(df)
+```
+Create function to convert dataframe into time series
+```{r}
+to_xts = function(df) {
+  #Convert UK Engergy data into xts
+  return(xts(as.numeric(as.character(df[,4])),order.by=as.POSIXct(as.character(df[,3]), format='%Y-%m-%d %H:%M:%S', tz="GMT")))
+}
+
+```
+```{r}
+str(df)
+unique(df[,1])
+```
+As we can see from above print out, there are about 5566 unique unit Ids. Each one of these id represent a house hold
+
+```{r}
+#Group by Acorn_group and return a list of data.frame of unique Acorn_grouped
+df_splited_by_Acorn_grouped = split(df,df$Acorn_grouped)
+```
+```{r}
+str(df_splited_by_Acorn_grouped)
+class(df_splited_by_Acorn_grouped[[1]])
+```
+```{r}
+list_by_Acorn_grouped.xts = list()
+
+for (i in 1:length(df_splited_by_Acorn_grouped)){ 
+  list_by_Acorn_grouped.xts = list.append(list_by_Acorn_grouped.xts, to_xts(df_splited_by_Acorn_grouped[[i]]))
+}
+
+daily_mean_by_Acorn_grouped.xts = list()
+
+for (i in 1:length(list_by_Acorn_grouped.xts)){
+  daily_mean_by_Acorn_grouped.xts = list.append(daily_mean_by_Acorn_grouped.xts, apply.daily(list_by_Acorn_grouped.xts[[i]], mean))
+}
+```
+```{r}
+i = 1
+str(daily_mean_by_Acorn_grouped.xts[[i]])
+head(daily_mean_by_Acorn_grouped.xts[[i]])
+autoplot(daily_mean_by_Acorn_grouped.xts[[i]])
+```
+```{r}
+i = 2
+str(daily_mean_by_Acorn_grouped.xts[[i]])
+head(daily_mean_by_Acorn_grouped.xts[[i]])
+autoplot(daily_mean_by_Acorn_grouped.xts[[i]])
+i = 3
+str(daily_mean_by_Acorn_grouped.xts[[i]])
+head(daily_mean_by_Acorn_grouped.xts[[i]])
+autoplot(daily_mean_by_Acorn_grouped.xts[[i]])
+i = 4
+str(daily_mean_by_Acorn_grouped.xts[[i]])
+head(daily_mean_by_Acorn_grouped.xts[[i]])
+autoplot(daily_mean_by_Acorn_grouped.xts[[i]])
+i = 5
+str(daily_mean_by_Acorn_grouped.xts[[i]])
+head(daily_mean_by_Acorn_grouped.xts[[i]])
+autoplot(daily_mean_by_Acorn_grouped.xts[[i]])
+```
+```{r}
+ggplot() + 
+geom_line(data=daily_mean_by_Acorn_grouped.xts[[3]], aes(x=index(daily_mean_by_Acorn_grouped.xts[[3]]), y=coredata(daily_mean_by_Acorn_grouped.xts[[3]])), color="blue") + 
+geom_line(data=daily_mean_by_Acorn_grouped.xts[[4]], aes(x=index(daily_mean_by_Acorn_grouped.xts[[4]]), y=coredata(daily_mean_by_Acorn_grouped.xts[[4]])), color="red") +
+geom_line(data=daily_mean_by_Acorn_grouped.xts[[5]], aes(x=index(daily_mean_by_Acorn_grouped.xts[[5]]), y=coredata(daily_mean_by_Acorn_grouped.xts[[5]])), color="yellow")
+```
+
+```{r}
+#Group by Acorn_group and return a list of data.frame of unique Acorn_grouped
+df_splited_by_stdorToU = split(df,df$stdorToU)
+```
+```{r}
+str(df_splited_by_stdorToU)
+class(df_splited_by_stdorToU[[1]])
+```
+```{r}
+list_by_stdorToU_grouped.xts = list()
+
+for (i in 1:length(df_splited_by_stdorToU)){ 
+  list_by_stdorToU_grouped.xts = list.append(list_by_stdorToU_grouped.xts, to_xts(df_splited_by_stdorToU[[i]]))
+}
+
+daily_mean_by_stdorToU.xts = list()
+
+for (i in 1:length(list_by_stdorToU.xts)){
+  daily_mean_by_stdorToU.xts = list.append(daily_mean_by_stdorToU.xts, apply.daily(list_by_stdorToU_grouped.xts[[i]], mean))
+}
+```
+```{r}
+i = 1
+str(daily_mean_by_stdorToU.xts[[i]])
+head(daily_mean_by_stdorToU.xts[[i]])
+autoplot(daily_mean_by_stdorToU.xts[[i]])
+
+i = 2
+str(daily_mean_by_stdorToU.xts[[i]])
+head(daily_mean_by_stdorToU.xts[[i]])
+autoplot(daily_mean_by_stdorToU.xts[[i]])
+```
+
+```{r}
+ggplot() + 
+geom_line(data=daily_mean_by_stdorToU.xts[[1]], aes(x=index(daily_mean_by_stdorToU.xts[[1]]), y=coredata(daily_mean_by_stdorToU.xts[[1]])), color="blue", group="std") + 
+geom_line(data=daily_mean_by_stdorToU.xts[[2]], aes(x=index(daily_mean_by_stdorToU.xts[[2]]), y=coredata(daily_mean_by_stdorToU.xts[[2]])), color="green", group="tou")
+```
+
