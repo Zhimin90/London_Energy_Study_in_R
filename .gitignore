@@ -1,3 +1,9 @@
+Power-Networks-Pieces
+Raw Data
+dir_to_ignore/Power-Networks-Pieces
+dir_to_ignore/Raw Data
+Power-Networks-LCL-June2015(withAcornGps)v2.csv
+
 # History files
 .Rhistory
 .Rapp.history
