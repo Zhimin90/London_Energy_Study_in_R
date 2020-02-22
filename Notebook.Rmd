@@ -131,4 +131,36 @@ ggplot() +
 geom_line(data=daily_mean_by_stdorToU.xts[[1]], aes(x=index(daily_mean_by_stdorToU.xts[[1]]), y=coredata(daily_mean_by_stdorToU.xts[[1]])), color="blue", group="std") + 
 geom_line(data=daily_mean_by_stdorToU.xts[[2]], aes(x=index(daily_mean_by_stdorToU.xts[[2]]), y=coredata(daily_mean_by_stdorToU.xts[[2]])), color="green", group="tou")
 ```
+```{r}
+library(tidyverse)
+library(forecast)
+library(fpp2)
 
+#convert the whole dataset from dataframe to timesseries
+uk_energy.xts = to_xts(df)
+```
+```{r}
+daily_uk_energy.xts = apply.daily(uk_energy.xts, mean)
+head(daily_uk_energy.xts, 50)
+autoplot(daily_uk_energy.xts)
+```
+```{r}
+ggAcf(daily_uk_energy.xts)
+ggPacf(daily_uk_energy.xts)
+```
+```{r}
+m_ar = Arima(coredata(daily_uk_energy.xts), order = c(1,0,0), include.constant = F)
+m_ar
+forecast(m_ar) %>% autoplot()
+```
+```{r}
+m_ar3 = Arima(coredata(daily_uk_energy.xts), order = c(3,0,0), include.constant = F)
+m_ar3
+forecast(m_ar3) %>% autoplot()
+```
+
+```{r}
+m_ma = Arima(coredata(daily_uk_energy.xts), order = c(0,0,30), include.constant = F)
+m_ma
+forecast(m_ma) %>% autoplot()
+```
